@@ -1,0 +1,16 @@
+.SC_ToggleButtonSet {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.SC_ToggleButtonSet h3 {
+  margin-bottom: 11px;
+}
+
+.SC_ToggleButtonSet > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}

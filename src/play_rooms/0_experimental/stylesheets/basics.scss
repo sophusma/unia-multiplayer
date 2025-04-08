@@ -1,0 +1,12 @@
+body.play_room {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--medium-grey);
+
+  & > div,
+  & > a {
+    margin: 10px 0;
+  }
+}

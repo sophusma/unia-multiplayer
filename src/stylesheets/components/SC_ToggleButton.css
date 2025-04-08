@@ -1,0 +1,20 @@
+.SC_ToggleButton {
+  padding: 8px 10px;
+  font-size: 14px;
+  text-align: center;
+  text-transform: capitalize;
+  background-color: var(--white);
+  color: var(--black);
+  cursor: pointer;
+}
+
+.SC_ToggleButton:hover:not(.active) {
+  background-color: var(--light-grey);
+}
+
+.SC_ToggleButton.active {
+  font-weight: 800;
+  color: var(--black);
+  background-color: var(--dark-green);
+  cursor: default;
+}
