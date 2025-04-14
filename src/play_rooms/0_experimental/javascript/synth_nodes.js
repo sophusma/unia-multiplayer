@@ -123,7 +123,20 @@ function setMelodyProperty(property, value) {
   }
 }
 
+// function setToneNodeProperty(property, value, type) {
+//   if (type === 'bass') {
+//     setBassProperty(property, value)
+//   } else if (type === 'melody') {
+//     setMelodyProperty(property, value)
+//   }
+// }
 function setToneNodeProperty(property, value, type) {
+  if (property === 'bpm') {
+    Tone.Transport.bpm.value = value
+    console.log('BPM updated to', value)
+    return
+  }
+
   if (type === 'bass') {
     setBassProperty(property, value)
   } else if (type === 'melody') {

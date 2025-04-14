@@ -1,6 +1,6 @@
 const preset = {
   synth: {
-    volume: -15,
+    volume: -20,
     detune: 0,
     portamento: 0.05,
     envelope: {
