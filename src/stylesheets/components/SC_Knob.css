@@ -1,84 +1,188 @@
 .SC_Knob {
-  display: flex; /* Используем flexbox для центрирования содержимого */
-  flex-direction: column; /* Выравниваем элементы по вертикали */
-  justify-content: flex-start; /* Располагаем элементы от верхнего края */
-  align-items: center; /* Центрируем элементы по горизонтали */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-/* Контейнер для самого кноба */
 .SC_Knob .wrapper {
-  position: relative; /* Для абсолютного позиционирования дочерних элементов */
-  width: 141px; /* Устанавливаем фиксированную ширину */
-  height: 127px; /* Устанавливаем фиксированную высоту */
-  margin-bottom: 0px; /* Убираем отступ снизу */
-  user-select: none; /* Отключаем выделение текста для лучшего UX */
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin-bottom: 14px;
+  user-select: none;
+  /* background: var(--medium-grey); */
 }
 
-/* Название, которое будет располагаться сверху */
-.SC_Knob .name {
-  position: absolute; /* Абсолютное позиционирование для точного контроля */
-  top: -40px; /* Поднимаем название над кнобом */
-  left: 50%; /* Центрируем название по горизонтали */
-  transform: translateX(
-    -50%
-  ); /* Исправляем точное центрирование по горизонтали */
-
-  font-size: 32px; /* Устанавливаем большой размер шрифта для заголовка */
-  font-weight: 400; /* Обычный вес шрифта */
-  text-align: center; /* Выравнивание текста по центру */
-  color: var(--semi-grey); /* Цвет текста - полу-серый */
+.SC_Knob .wrapper h3 {
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--white);
 }
 
-/* Основной контейнер для тела кноба */
 .SC_Knob .body {
-  position: absolute; /* Позиционируем внутри родительского элемента */
-  left: 50%; /* Центрируем по горизонтали */
-  top: 50%; /* Центрируем по вертикали */
-  transform: translate(-50%, -50%); /* Смещаем, чтобы точка была в центре */
+  position: absolute;
+  left: 60px;
+  top: 86px;
 }
 
-/* Стилизуем сам круглый элемент кноба */
 .SC_Knob .body div {
-  position: absolute; /* Абсолютное позиционирование */
-  top: 0; /* Верхний отступ */
-  left: 0; /* Левый отступ */
-  width: 95px; /* Ширина кноба */
-  height: 95px; /* Высота кноба */
-  background: var(--pure-white); /* Белый цвет фона */
-  border-radius: 50%; /* Скругляем углы, делаем круг */
-  z-index: 1; /* Устанавливаем на передний план */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  background: var(--white);
+  border-radius: 50%;
+  z-index: 1;
 }
 
-/* Эффект при наведении */
 .SC_Knob .body div:hover {
-  filter: brightness(90%); /* Уменьшаем яркость при наведении */
-  cursor: pointer; /* Меняем курсор на указатель */
+  filter: brightness(90%);
+  cursor: pointer;
 }
 
-/* Маленькая точка в центре кноба */
 .SC_Knob .body div::before {
   position: absolute;
   top: 0;
   left: 28px;
-  display: block; /* Блочный элемент */
-  content: ''; /* Пустое содержимое */
-  width: 9.5px; /* Ширина точки */
-  height: 9.5px; /* Высота точки */
-  background: var(--soft-black); /* Цвет точки */
-  border-radius: 50%; /* Скругляем, делаем круг */
+  display: block;
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: var(--dark-green);
 }
 
-/* Убираем все визуальные элементы, такие как риски, буллеты и значения */
-.SC_Knob .group,
-.SC_Knob .bullet,
-.SC_Knob .lastBullet,
-.SC_Knob .value,
-.SC_Knob #value7,
-.SC_Knob #value9,
-.SC_Knob #value11,
-.SC_Knob #value12,
-.SC_Knob #value2,
-.SC_Knob #value3,
+.SC_Knob .value {
+  position: absolute;
+  top: 55px;
+  width: 100%;
+  text-align: center;
+  font-family: sans-serif;
+  font-size: 12px;
+  display: flex;
+  width: 22px;
+  height: 13px;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--white);
+}
+
+.SC_Knob .bullet {
+  width: 4px;
+  height: 9px;
+  background-color: var(--white);
+}
+
+.SC_Knob .group {
+  position: absolute;
+  height: 93px;
+  width: 4px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.SC_Knob #group1 {
+  transform: rotate(90deg);
+  left: 88px;
+  top: 70px;
+}
+
+.SC_Knob #group2 {
+  transform: rotate(45deg);
+  left: 89px;
+  top: 70px;
+}
+
+.SC_Knob #group3 {
+  top: 70px;
+  left: 87px;
+  transform: rotate(-45deg);
+}
+
+.SC_Knob .lastBullet {
+  width: 4px;
+  height: 9px;
+  left: 88px;
+  top: 70px;
+  background-color: var(--white);
+  position: absolute;
+}
+
+.SC_Knob .name {
+  position: absolute;
+  top: 14px;
+  left: 15px;
+  width: 150px;
+  height: 20px;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: center;
+}
+
+.SC_Knob #value7 {
+  top: 148px;
+  left: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.SC_Knob #value9 {
+  top: 109px;
+  left: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.SC_Knob #value11 {
+  top: 71px;
+  left: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.SC_Knob #value12 {
+  top: 55px;
+  left: 79px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.SC_Knob #value2 {
+  top: 71px;
+  right: 31px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.SC_Knob #value3 {
+  top: 109px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-start;
+  text-align: left;
+}
+
 .SC_Knob #value5 {
-  display: none; /* Просто скрываем все ненужные элементы */
+  top: 148px;
+  right: 31px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: flex-start;
+  text-align: left;
 }

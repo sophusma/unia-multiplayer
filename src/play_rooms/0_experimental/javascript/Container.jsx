@@ -18,8 +18,12 @@ export default class Container extends Component {
       bassSoundPreset: 'default',
       melodySoundPreset: 'default',
       bpm: 80,
-      reverbWet: 0.3,
-      distortionWet: 0
+
+      bassVolume: -25,
+      bassReverbWet: 0.3,
+      bassDistortionWet: 0,
+
+      melodyVolume: -20
     }
   }
 
@@ -32,10 +36,8 @@ export default class Container extends Component {
   }
 
   handleChange = (property, value, type = '') => {
-    const stateKey = type ? `${type}${property}` : property
-
     this.setState({
-      [stateKey]: value
+      [property]: value
     })
 
     setToneNodeProperty(property, value, type)
@@ -79,23 +81,43 @@ export default class Container extends Component {
           }
         />
 
-        <SC_Knob
-          name="reverb"
-          property="bassReverbWet"
-          min={0}
-          max={1}
-          step={0.1}
-          value={this.state.reverbWet}
+        <SC_Slider
+          name="bass volume"
+          min={-60}
+          max={0}
+          step={5}
+          value={this.state.bassVolume}
+          property="bassVolume"
+          handleChange={this.handleChange}
+        />
+
+        <SC_Slider
+          name="melody volume"
+          min={-60}
+          max={0}
+          step={5}
+          value={this.state.melodyVolume}
+          property="melodyVolume"
           handleChange={this.handleChange}
         />
 
         <SC_Knob
-          name="distortion"
-          property="distortionWet"
+          name="bass reverb"
+          property="bassReverbWet"
           min={0}
           max={1}
           step={0.1}
-          value={this.state.distortionWet}
+          value={this.state.bassReverbWet}
+          handleChange={this.handleChange}
+        />
+
+        <SC_Knob
+          name="bass distortion"
+          property="bassDistortionWet"
+          min={0}
+          max={1}
+          step={0.1}
+          value={this.state.bassDistortionWet}
           handleChange={this.handleChange}
         />
       </div>

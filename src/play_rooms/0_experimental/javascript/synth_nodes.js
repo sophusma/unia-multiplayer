@@ -100,6 +100,10 @@ function setBassProperty(property, value) {
     toneNodes.bassReverb.wet.value = value
   } else if (property === 'distortionWet') {
     toneNodes.bassDistortion.wet.value = value
+  } else if (property === 'bassVolume') {
+    toneNodes.bassSynth.volume.value = value // Tone.dbToGain(value) переводит значение громкости из заданного диапозона в тонДс децибелы
+  } else {
+    console.error('Bass node is not initialized.')
   }
 }
 
@@ -120,6 +124,10 @@ function setMelodyProperty(property, value) {
     }
   } else if (property === 'bpm') {
     Tone.Transport.bpm.value = value
+  } else if (property === 'melodyVolume') {
+    toneNodes.melodySynth.volume.value = value
+  } else {
+    console.error('Bass node is not initialized.')
   }
 }
 
@@ -134,6 +142,15 @@ function setToneNodeProperty(property, value, type) {
   if (property === 'bpm') {
     Tone.Transport.bpm.value = value
     console.log('BPM updated to', value)
+    return
+  }
+
+  if (property === 'bassVolume') {
+    setBassProperty(property, value)
+    return
+  }
+  if (property === 'melodyVolume') {
+    setMelodyProperty(property, value)
     return
   }
 
