@@ -3,11 +3,14 @@
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
+  width: 440px;
+  height: 64px;
 }
 
 .SC_Slider h3 {
-  margin-bottom: 14px;
-  font-size: 16px;
+  margin-bottom: 0px;
+  font-size: 32px;
+  color: var(--semi-grey);
 }
 
 .SC_Slider input[type='range'] {
@@ -17,7 +20,7 @@
 
 .SC_Slider input[type='range']::-webkit-slider-runnable-track {
   height: 4px;
-  background: var(--white);
+  background: var(--semi-grey);
   border: none;
 }
 
@@ -27,7 +30,7 @@
   height: 16px;
   width: 16px;
   border-radius: 50%;
-  background: var(--dark-green);
+  background: var(--semi-grey);
   margin-top: -6px;
   cursor: pointer;
 }
@@ -37,5 +40,5 @@
 }
 
 .SC_Slider input[type='range']:focus::-webkit-slider-runnable-track {
-  background: var(--white);
+  background: var(--semi-grey);
 }

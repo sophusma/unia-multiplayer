@@ -1,19 +1,31 @@
 import * as Tone from 'tone'
 
-import * as bassSettings from '../tunes/bass.js'
-import * as melodySettings from '../tunes/melody.js'
+import { bassSettings } from '../tunes/bass.js'
+import { melodySettings } from '../tunes/melody.js'
+import { padSettings } from '../tunes/pad.js'
 
 const toneNodes = {}
-
+function createEffect(effectType, settings) {
+  const effect = new Tone[effectType](settings)
+  effect.toDestination()
+  return effect
+}
+function createFilter(type = 'lowpass', frequency = 400, rolloff = -12) {
+  return new Tone.Filter({
+    type: type,
+    frequency: frequency,
+    rolloff: rolloff
+  }).toDestination()
+}
 function initBass() {
   const { synth, chorus, pingPongDelay, reverb, distortion } =
-    bassSettings.preset
+    bassSettings.initialPreset
 
   //ДОБАВЛЯЮ ЭФФЕКТЫ
   toneNodes.bassSynth = new Tone.Synth(synth)
   toneNodes.bassChorus = new Tone.Chorus(chorus).start()
-  toneNodes.bassReverb = new Tone.Distortion(distortion).toDestination()
-  toneNodes.bassDistortion = new Tone.Reverb(reverb).toDestination()
+  toneNodes.bassDistortion = new Tone.Distortion(distortion)
+  toneNodes.bassReverb = new Tone.Reverb(reverb)
   toneNodes.bassPingPongDelay = new Tone.PingPongDelay(
     pingPongDelay
   ).toDestination()
@@ -41,7 +53,7 @@ function initBass() {
 
 function initMelody() {
   const { synth, chorus, distortion, bitCrusher, pingPongDelay } =
-    melodySettings.preset
+    melodySettings.initialPreset
 
   toneNodes.melodySynth = new Tone.Synth(synth)
   toneNodes.melodyChorus = new Tone.Chorus(chorus).start()
@@ -71,6 +83,41 @@ function initMelody() {
   toneNodes.melodyPart.loop = melodySettings.sequence.loop
 }
 
+function initPad() {
+  const { synth, autoFilter, lfo, reverb } = padSettings.initialPreset
+
+  // Создаём synth и эффекты
+  toneNodes.padSynth = new Tone.Synth(synth)
+  toneNodes.padAutoFilter = createEffect('AutoFilter', autoFilter).start()
+  toneNodes.padReverb = new Tone.Reverb(reverb).toDestination()
+  const filter = createFilter('lowpass', 400, -12)
+
+  // LFO → filter.frequency
+  if (lfo) {
+    toneNodes.padLfo = new Tone.LFO({
+      frequency: 0.5,
+      min: 200,
+      max: 800
+    }).start()
+    toneNodes.padLfo.connect(filter.frequency)
+  }
+
+  // Цепочка сигнала
+  toneNodes.padSynth.chain(toneNodes.padAutoFilter, filter, toneNodes.padReverb)
+
+  toneNodes.padPart = new Tone.Part((time, note) => {
+    toneNodes.padSynth.triggerAttackRelease(
+      note.noteName,
+      note.duration,
+      time,
+      note.velocity
+    )
+  }, padSettings.sequence.notes).start(0)
+
+  toneNodes.padPart.loopEnd = padSettings.sequence.duration
+  toneNodes.padPart.loop = padSettings.sequence.loop
+}
+
 function initToneTransport() {
   Tone.Transport.bpm.value = 80
   Tone.Transport.start()
@@ -78,21 +125,29 @@ function initToneTransport() {
 
 function setBassProperty(property, value) {
   if (property === 'bassSoundPreset') {
-    if (value === 'default') {
-      toneNodes.bassChorus.frequency.value = 1.5
-      toneNodes.bassChorus.delayTime = 3.5
-      toneNodes.bassPingPongDelay.wet.value = 0.2
-      toneNodes.bassPingPongDelay.delayTime.value = 0.25
-    } else if (value === 'preset1') {
-      toneNodes.bassChorus.frequency.value = 10
-      toneNodes.bassChorus.delayTime = 5.5
-      toneNodes.bassPingPongDelay.wet.value = 0.4
-      toneNodes.bassPingPongDelay.delayTime.value = 0.4
-    } else if (value === 'preset2') {
-      toneNodes.bassChorus.frequency.value = 30
-      toneNodes.bassChorus.delayTime = 8.5
-      toneNodes.bassPingPongDelay.wet.value = 0.6
-      toneNodes.bassPingPongDelay.delayTime.value = 0.6
+    const preset = bassSettings.presets[value]
+
+    if (!preset) {
+      console.warn(`Пресет ${value} не найден`)
+      return
+    }
+
+    // эффекты
+    toneNodes.bassChorus.frequency.value = preset.chorus.frequency
+    toneNodes.bassChorus.delayTime = preset.chorus.delayTime
+    toneNodes.bassPingPongDelay.wet.value = preset.pingPongDelay.wet
+    toneNodes.bassPingPongDelay.delayTime.value = preset.pingPongDelay.delayTime
+
+    // реверб/дисторшн
+    toneNodes.bassReverb.wet.value = preset.reverb.wet
+    toneNodes.bassDistortion.wet.value = preset.distortion.wet
+
+    // мелодия
+    if (preset.sequence) {
+      toneNodes.bassPart.clear()
+      preset.sequence.forEach((note) => {
+        toneNodes.bassPart.add(note)
+      })
     }
   } else if (property === 'bpm') {
     Tone.Transport.bpm.value = value
@@ -101,7 +156,7 @@ function setBassProperty(property, value) {
   } else if (property === 'distortionWet') {
     toneNodes.bassDistortion.wet.value = value
   } else if (property === 'bassVolume') {
-    toneNodes.bassSynth.volume.value = value // Tone.dbToGain(value) переводит значение громкости из заданного диапозона в тонДс децибелы
+    toneNodes.bassSynth.volume.value = value
   } else {
     console.error('Bass node is not initialized.')
   }
@@ -109,35 +164,108 @@ function setBassProperty(property, value) {
 
 function setMelodyProperty(property, value) {
   if (property === 'melodySoundPreset') {
-    if (value === 'default') {
-      toneNodes.melodyDistortion.wet.value = 0
-      toneNodes.melodyDistortion.distortion = 0
-      toneNodes.melodyPingPongDelay.wet.value = 0.6
-    } else if (value === 'preset1') {
-      toneNodes.melodyDistortion.wet.value = 0.4
-      toneNodes.melodyDistortion.distortion = 0.5
-      toneNodes.melodyPingPongDelay.wet.value = 1
-    } else if (value === 'preset2') {
-      toneNodes.melodyDistortion.wet.value = 0.8
-      toneNodes.melodyDistortion.distortion = 0.8
-      toneNodes.melodyPingPongDelay.wet.value = 0
+    const preset = melodySettings.presets[value]
+
+    if (!preset) {
+      console.warn(`Пресет ${value} не найден`)
+      return
+    }
+
+    // эффекты
+    toneNodes.melodyDistortion.wet.value = preset.distortion.wet
+    toneNodes.melodyDistortion.distortion = preset.distortion.distortion
+    toneNodes.melodyPingPongDelay.wet.value = preset.pingPongDelay.wet
+
+    // мелодия
+    if (preset.sequence) {
+      toneNodes.melodyPart.clear()
+      preset.sequence.forEach((note) => {
+        toneNodes.melodyPart.add(note)
+      })
     }
   } else if (property === 'bpm') {
     Tone.Transport.bpm.value = value
   } else if (property === 'melodyVolume') {
     toneNodes.melodySynth.volume.value = value
   } else {
-    console.error('Bass node is not initialized.')
+    console.error('Melody node is not initialized.')
   }
 }
 
-// function setToneNodeProperty(property, value, type) {
-//   if (type === 'bass') {
-//     setBassProperty(property, value)
-//   } else if (type === 'melody') {
-//     setMelodyProperty(property, value)
-//   }
-// }
+const setPadProperty = (property, value) => {
+  if (property === 'padSoundPreset') {
+    const preset = padSettings.presets[value]
+
+    if (!preset) {
+      console.warn(`⛔️ Пресет ${value} не найден`)
+      return
+    }
+
+    // Применение эффектов
+    if (preset.effects?.reverb) {
+      const rev = preset.effects.reverb
+      if (toneNodes.padReverb && toneNodes.padReverb.wet && isFinite(rev.wet)) {
+        toneNodes.padReverb.wet.value = rev.wet
+      }
+
+      if (isFinite(rev.decay)) toneNodes.padReverb.decay = rev.decay
+      if (isFinite(rev.preDelay)) toneNodes.padReverb.preDelay = rev.preDelay
+    }
+
+    // Применение автофильтра и LFO
+    const effects = preset.effects || padSettings.initialPreset.effects
+
+    // Настройка автофильтра
+    if (effects.autoFilter) {
+      const af = effects.autoFilter
+      if (toneNodes.padAutoFilter) {
+        toneNodes.padAutoFilter.frequency.value = af.frequency
+        toneNodes.padAutoFilter.baseFrequency = af.baseFrequency
+        toneNodes.padAutoFilter.octaves = af.octaves
+        toneNodes.padAutoFilter.filter.type = af.filter.type
+        toneNodes.padAutoFilter.filter.rolloff = af.filter.rolloff
+        toneNodes.padAutoFilter.filter.Q.value = af.filter.Q
+        toneNodes.padAutoFilter.wet.value = af.wet
+      }
+    }
+
+    // Настройка LFO
+    if (effects.lfo) {
+      const lfo = effects.lfo
+      if (toneNodes.padLFO) {
+        toneNodes.padLFO.frequency.value = lfo.frequency
+        toneNodes.padLFO.min = lfo.min
+        toneNodes.padLFO.max = lfo.max
+        toneNodes.padLFO.type = lfo.type
+
+        // Проверка корректности target и подключение LFO
+        const targetNode = toneNodes.padSynth[lfo.target.split('.')[1]]
+        if (targetNode) {
+          toneNodes.padLFO.connect(targetNode)
+        } else {
+          console.warn(`⛔️ Не удалось найти цель для LFO: ${lfo.target}`)
+        }
+      }
+    }
+
+    // Обновление мелодии, если она есть в пресете
+    if (preset.sequence) {
+      toneNodes.padPart.clear()
+      preset.sequence.forEach((note) => {
+        toneNodes.padPart.add(note)
+      })
+    }
+  } else if (property === 'padVolume') {
+    if (toneNodes.padSynth.volume && isFinite(value)) {
+      toneNodes.padSynth.volume.value = value
+    } else {
+      console.warn(`⛔️ Недопустимое значение громкости:`, value)
+    }
+  } else {
+    console.warn(`⛔️ Неизвестное свойство pad: ${property}`)
+  }
+}
+
 function setToneNodeProperty(property, value, type) {
   if (property === 'bpm') {
     Tone.Transport.bpm.value = value
@@ -149,8 +277,14 @@ function setToneNodeProperty(property, value, type) {
     setBassProperty(property, value)
     return
   }
+
   if (property === 'melodyVolume') {
     setMelodyProperty(property, value)
+    return
+  }
+
+  if (property === 'padVolume') {
+    setPadProperty(property, value)
     return
   }
 
@@ -158,12 +292,15 @@ function setToneNodeProperty(property, value, type) {
     setBassProperty(property, value)
   } else if (type === 'melody') {
     setMelodyProperty(property, value)
+  } else if (type === 'pad') {
+    setPadProperty(property, value)
   }
 }
 
 function initToneNodes() {
   initBass()
   initMelody()
+  initPad()
   initToneTransport()
 }
 
@@ -171,5 +308,6 @@ export {
   initToneNodes,
   setToneNodeProperty,
   setBassProperty,
-  setMelodyProperty
+  setMelodyProperty,
+  setPadProperty
 }

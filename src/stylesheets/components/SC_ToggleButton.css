@@ -1,11 +1,16 @@
 .SC_ToggleButton {
   padding: 8px 10px;
-  font-size: 14px;
+  font-size: 64px;
+  font-family: 'Neue Haas Unica';
   text-align: center;
-  text-transform: capitalize;
-  background-color: var(--white);
-  color: var(--black);
+  text-transform: lowercase;
+  background-color: var(--pure-white);
+  color: var(--semi-grey);
   cursor: pointer;
+  width: 440px;
+  height: 64px;
+  margin-bottom: 4px;
+  letter-spacing: -0.08em;
 }
 
 .SC_ToggleButton:hover:not(.active) {
@@ -13,8 +18,7 @@
 }
 
 .SC_ToggleButton.active {
-  font-weight: 800;
-  color: var(--black);
-  background-color: var(--dark-green);
+  color: var(--pure-white);
+  background-color: var(--semi-grey);
   cursor: default;
 }

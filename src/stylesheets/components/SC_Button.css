@@ -1,14 +1,17 @@
 .SC_Button {
-  padding: 8px 10px;
-  font-size: 14px;
+  /* padding: 8px 10px; */
+  width: 440px;
+  height: 64px;
+  font-size: 64px;
   text-align: center;
-  text-transform: capitalize;
-  background-color: var(--white);
-  color: var(--black);
+  text-transform: lowercase;
+  font-family: 'Neue Haas Unica';
+  background-color: var(--acid-green);
+  color: var(--soft-black);
   cursor: pointer;
 }
 
 .SC_Button:hover {
-  background-color: var(--white);
+  background-color: var(--acid-green);
   filter: brightness(90%);
 }

@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 
 import { initToneNodes, setToneNodeProperty } from './synth_nodes.js'
+import { bassSettings } from '../tunes/bass.js'
+import { melodySettings } from '../tunes/melody.js'
+import { padSettings } from '../tunes/pad.js'
 
 import SC_Button from '../../../javascript/components/SC_Button.jsx'
 import SC_Slider from '../../../javascript/components/SC_Slider.jsx'
@@ -15,15 +18,27 @@ export default class Container extends Component {
 
     this.state = {
       isStarted: false,
+
+      activePresets: {
+        melody: false,
+        bass: false,
+        pad: false
+      },
       bassSoundPreset: 'default',
       melodySoundPreset: 'default',
+      padSoundPreset: 'default',
       bpm: 80,
 
+      //БАСС
       bassVolume: -25,
       bassReverbWet: 0.3,
       bassDistortionWet: 0,
 
-      melodyVolume: -20
+      //МЕЛОДИЯ
+      melodyVolume: -20,
+
+      //ПЭД
+      padVolume: -12
     }
   }
 
@@ -41,12 +56,54 @@ export default class Container extends Component {
     })
 
     setToneNodeProperty(property, value, type)
+
+    if (property === 'bassSoundPreset') {
+      const bassPresetSettings = bassSettings?.presets?.[value]
+      if (bassPresetSettings) {
+        this.setState({
+          bassReverbWet: bassPresetSettings.reverbWet,
+          bassDistortionWet: bassPresetSettings.distortionWet,
+          bassVolume: bassPresetSettings.volume
+        })
+      } else {
+        console.warn(`Пресет ${value} не найден в bassSettings.presets`)
+      }
+    }
+
+    if (property === 'melodySoundPreset') {
+      const melodyPresetSettings = melodySettings?.presets?.[value]
+      if (melodyPresetSettings) {
+        this.setState({
+          melodyVolume: melodyPresetSettings.volume
+        })
+      } else {
+        console.warn(`Пресет ${value} не найден в melodySettings.presets`)
+      }
+    }
+
+    if (property === 'padSoundPreset') {
+      const padPresetSettings = padSettings?.presets?.[value]
+      if (padPresetSettings) {
+        this.setState({ padVolume: padPresetSettings.volume })
+
+        setToneNodeProperty('padVolume', padPresetSettings.volume, 'pad')
+      }
+    }
+
     sendToFirebase(property, value)
   }
 
-  renderUI = () => {
-    const { bassSoundPreset, melodySoundPreset, bpm } = this.state
+  // Универсальная функция для обработки клика по кнопке
+  handlePresetToggle = (presetType) => {
+    this.setState((prevState) => ({
+      activePresets: {
+        ...prevState.activePresets,
+        [presetType]: !prevState.activePresets[presetType]
+      }
+    }))
+  }
 
+  renderUI = () => {
     return (
       <div className="Container">
         <SC_ToggleButtonSet
@@ -66,6 +123,16 @@ export default class Container extends Component {
           property="melodySoundPreset"
           handleChange={(property, value) =>
             this.handleChange(property, value, 'melody')
+          }
+        />
+
+        <SC_ToggleButtonSet
+          name="Pad Sound Preset"
+          options={['default', 'preset1', 'preset2']}
+          value={this.state.padSoundPreset}
+          property="padSoundPreset"
+          handleChange={(property, value) =>
+            this.handleChange(property, value, 'pad')
           }
         />
 
@@ -101,13 +168,23 @@ export default class Container extends Component {
           handleChange={this.handleChange}
         />
 
+        <SC_Slider
+          name="pad volume"
+          min={-60}
+          max={0}
+          step={5}
+          value={this.state.padVolume}
+          property="padVolume"
+          handleChange={this.handleChange}
+        />
+
         <SC_Knob
           name="bass reverb"
           property="bassReverbWet"
           min={0}
           max={1}
           step={0.1}
-          value={this.state.bassReverbWet}
+          value={this.state.bassReverbWet || 0.3}
           handleChange={this.handleChange}
         />
 
@@ -117,7 +194,7 @@ export default class Container extends Component {
           min={0}
           max={1}
           step={0.1}
-          value={this.state.bassDistortionWet}
+          value={this.state.bassDistortionWet || 0}
           handleChange={this.handleChange}
         />
       </div>

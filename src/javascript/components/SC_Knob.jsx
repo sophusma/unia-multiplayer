@@ -226,7 +226,7 @@ export default class SC_Knob extends PureComponent {
 
 SC_Knob.propTypes = {
   name: PropTypes.string.isRequired,
-  property: PropTypes.string.isRequired,
+  property: PropTypes.array.isRequired,
   min: PropTypes.number.isRequired,
   max: PropTypes.number.isRequired,
   value: PropTypes.number.isRequired,
